@@ -1,1 +1,6 @@
-This file was created by IntelliJ IDEA 11.1.3 for binding GitHub repository
+A parser for MicroXML in JavaScript.
+
+See http://www.w3.org/community/microxml/ for more about MicroXML.
+
+James Clark
+jjc@jclark.com
