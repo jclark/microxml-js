@@ -9,28 +9,28 @@ MicroXML.parse = function(source) {
     var pos = 0;
     var curChar = source.charAt(0);
 
-    var error = function(type) {
-	var args = [];
-	var i;
-	for (i = 1; i < arguments.length; ++i)
-	    args += arguments[i];
-	throw({
-	    name: "ParseError",
-	    errorType: type,
-	    args: args,
-	    position: pos
-	});
-    }
+    var error = function (type) {
+        var args = [];
+        var i;
+        for (i = 1; i < arguments.length; ++i)
+            args += arguments[i];
+        throw({
+            name:"ParseError",
+            errorType:type,
+            args:args,
+            position:pos
+        });
+    };
 
     var advance = function() {
 	curChar = source.charAt(++pos);
-    }
+    };
 
     var expect = function(ch) {
 	if (curChar != ch)
 	    error("expected", ch);
 	advance();
-    }
+    };
 
     var tryChar = function(ch) {
 	if (curChar === ch) {
@@ -38,7 +38,7 @@ MicroXML.parse = function(source) {
 	    return true;
 	}
 	return false;
-    }
+    };
 
     var tryS = function() {
 	if (curChar === ' ' || curChar === '\r' || curChar === '\n' || curChar === '\t') {
@@ -46,7 +46,7 @@ MicroXML.parse = function(source) {
 	    return true;
 	}
 	return false;
-    }
+    };
 
     var nameStartCharRegexp = /^[A-Za-z_]$/;
 
@@ -56,7 +56,7 @@ MicroXML.parse = function(source) {
 	    return true;
 	}
 	return false;
-    }
+    };
 
     var nameCharRegexp = /^[-._A-Za-z0-9]$/;
 
@@ -66,7 +66,7 @@ MicroXML.parse = function(source) {
 	    return true;
 	}
 	return false;
-    }
+    };
 
     var parseDocument = function() {
 	var result;
@@ -81,7 +81,7 @@ MicroXML.parse = function(source) {
 	if (curChar !== "")
 	    error("syntax");
 	return result;
-    }
+    };
 
     var parseName = function() {
 	var startPos = pos;
@@ -90,7 +90,7 @@ MicroXML.parse = function(source) {
 	while (tryNameChar())
 	    ;
 	return source.slice(startPos, pos);
-    }
+    };
 
     var hexCharRegexp = /^[a-fA-F0-9]$/;
     var charNames = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'"};
@@ -121,7 +121,7 @@ MicroXML.parse = function(source) {
                 error("badCharName", name);
             return ch;
         }
-    }
+    };
 
    /* precondition: curChar > ">"
        post: curChar <= ">" */
@@ -152,7 +152,7 @@ MicroXML.parse = function(source) {
             advance();
         } while (curChar > ">");
         return source.slice(startPos, pos);
-    }
+    };
 
     /* current char is whitespace before attribute;
      return true if attribute was parsed */
@@ -220,7 +220,7 @@ MicroXML.parse = function(source) {
         else
 	    attributeMap[name] = value;
 	return true;
-    }
+    };
 
     /* precondition: current char is character after "<";
        postcondition: current char is character after ">"
@@ -287,8 +287,8 @@ MicroXML.parse = function(source) {
                     break;
             }
 	}
-    }
+    };
     
     return parseDocument();
-}
+};
 
