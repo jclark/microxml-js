@@ -1,24 +1,75 @@
 var MicroXML = { };
-/*
-TODO:
-Better errors
-*/
+
 MicroXML.parse = function(source) {
     "use strict";
     var pos = 0;
     var curChar = source.charAt(0);
 
-    var error = function (type) {
+    var error = function(template) {
         var args = [];
         var i;
         for (i = 1; i < arguments.length; ++i)
-            args += arguments[i];
+            args.push(arguments[i]);
+        doError(pos, pos === source.length ? pos : pos + 1, template, args);
+    };
+
+    // Report an error with an explicit associated position.
+    var posError = function(startPos, endPos, template) {
+        var args = [];
+        var i;
+        for (i = 3; i < arguments.length; ++i)
+            args.push(arguments[i]);
+        doError(startPos, endPos, template, args);
+    };
+
+    var doError = function (startPos, endPos, template, args) {
         throw({
-            name:"ParseError",
-            errorType:type,
-            args:args,
-            position:pos
+            origin: "MicroXML",
+            message: subst(template, args),
+            startPosition: startPos,
+            endPosition: endPos,
+            template: template,
+            args: args,
+            subst: subst
         });
+    };
+
+    var subst = function(str, args) {
+        var res = "";
+        var start = 0;
+        for (;;) {
+            var i = str.indexOf('%', start);
+            if (i < 0) {
+                if (start === 0)
+                    return str;
+                res += str.slice(start);
+                break;
+            }
+            res += str.slice(start, i);
+            var ch = str.charAt(i + 1);
+            if (ch === "") {
+                res += "%";
+                break;
+            }
+            if (ch >= "1" && ch <= "9") {
+                var argIndex = ch.charCodeAt(0) - "0".charCodeAt(0) - 1;
+                if (argIndex < args.length) {
+                    res += args[argIndex];
+                }
+            }
+            else {
+                res += "%";
+                if (ch !== "%") {
+                    res += ch;
+                }
+            }
+            start = i + 2;
+        }
+        return res;
+    };
+
+    var formatCodePoint = function(ch) {
+        return ch.charCodeAt(0).toString(16).toUpperCase();
     };
 
     var advance = function() {
@@ -27,7 +78,7 @@ MicroXML.parse = function(source) {
 
     var expect = function(ch) {
 	if (curChar != ch)
-	    error("expected", ch);
+	    error("expected \"%1\"", ch);
 	advance();
     };
 
@@ -108,7 +159,7 @@ MicroXML.parse = function(source) {
                 break;
             parseComment();
         }
-        error("onlyCommentAfterDocumentElement");
+        error("only comments and white space are allowed after the document element");
 	return result;
     };
 
@@ -123,7 +174,7 @@ MicroXML.parse = function(source) {
                 parseSafeChars();
             switch (curChar) {
                 case "":
-                    error("missingCommentClose");
+                    error("missing comment close \"-->\"");
                 case "-":
                     advance();
                     if (tryChar("-")) {
@@ -133,7 +184,7 @@ MicroXML.parse = function(source) {
                     break;
                 default:
                     if (curChar < " ")
-                        error("controlChar");
+                        error("control character #x%1 not allowed", formatCodePoint(curChar));
                     /* fall through */
                 case "\n":
                 case "\r":
@@ -146,7 +197,7 @@ MicroXML.parse = function(source) {
     var parseName = function() {
 	var startPos = pos;
 	if (!tryNameStartChar())
-	    error("syntax");
+	    error("invalid name start character");
 	while (tryNameChar())
 	    ;
 	return source.slice(startPos, pos);
@@ -163,29 +214,32 @@ MicroXML.parse = function(source) {
                 advance();
             var hexNumber = source.slice(startPos, pos);
             expect(";");
+            var charRefError = function(template) {
+                posError(startPos, pos - 1, template, hexNumber);
+            };
             var codePoint = parseInt(hexNumber, 16);
             if (codePoint < 0x7F) {
-                if (codePoint < " ") {
-                    if (codePoint !== "\n" && codePoint !== "\t")
-                        error("c0ControlCharRef", hexNumber);
+                if (codePoint < 0x20) {
+                    if (codePoint !== 0xA && codePoint !== 0x9)
+                        charRefError("reference to control character #x%1 not allowed");
                 }
             }
             else if (codePoint >= 0xD800) {
                 if (codePoint >= 0x10000) {
                     if (codePoint > 0x10FFFF)
-                        error("codePointTooBig", hexNumber);
+                        charRefError("character number #x%1 not allowed: greater than #x10FFF");
                     if ((codePoint & 0xFFFE) === 0xFFFE)
-                        error("nonCharacterCharRef", hexNumber);
+                        charRefError("reference to noncharacter code point #x%1 not allowed");
                     codePoint -= 0x10000;
                     return String.fromCharCode((codePoint >> 10) | 0xD800, (codePoint & 0x3FF) | 0xDC00);
                 }
                 if (codePoint <= 0xDFFF)
-                    error("surrogateCharRef", hexNumber);
+                    charRefError("reference to surrogate code point #x%1 now allowed");
                 if (codePoint >= 0xFDD0 && (codePoint <= 0xFDEF || codePoint >= 0xFFFE))
-                    error("nonCharacterCharRef", hexNumber);
+                    charRefError("reference to noncharacter code point #x%1 not allowed");
             }
             else if (codePoint <= 0x9F)
-                error("c1ControlCharRef", hexNumber);
+                charRefError("reference to C1 control character #x%1 not allowed", hexNumber);
             return String.fromCharCode(codePoint);
         }
         else {
@@ -193,7 +247,7 @@ MicroXML.parse = function(source) {
             expect(";");
             var ch = charNames[name];
             if (typeof(ch) != "string")
-                error("badCharName", name);
+                posEerror(pos - name.length - 1, pos - 1, "unknown character name \"%1\"", name);
             return ch;
         }
     };
@@ -205,23 +259,25 @@ MicroXML.parse = function(source) {
         do {
             if (curChar >= "\u007F") {
                 if (curChar <= "\u009F")
-                    error("controlChar");
+                    error("control character #x%1 not allowed", formatCodePoint(curChar));
                 if (curChar >= "\uD800") {
                     if (curChar <= "\uDFFF") {
-                        if (curChar >= "\uDC00" || pos + 1 === source.length)
-                            error("invalidSurrogatePair");
+                        if (curChar >= "\uDC00")
+                            error("high surrogate code point #x%1 not following low surrogate", formatCodePoint(curChar));
+                        if (pos + 1 === source.length)
+                            error("incomplete surrogate pair");
                         var code2 = source.charCodeAt(pos + 1);
                         if (code2 < 0xDC00 || code2 > 0xDFFF)
-                            error("invalidSurrogatePair");
+                            posError(pos + 1, pos + 2, "expected high surrogate code point not #x%1", formatCodePoint(curChar));
                         if ((code2 & 0x3FE) === 0x3FE) {
                             var code1 = curChar.charCodeAt(0);
                             if ((code1 & 0x3F) === 0x3F)
-                                error("nonCharacter");
+                                posError(pos, pos + 1, "noncharacter code point");
                         }
                         advance();
                     }
                     else if (curChar >= "\uFDD0" && (curChar <= "\uFDEF" || curChar >= "\uFFFE"))
-                        error("nonCharacter");
+                        error("noncharacter #x%1 not allowed", formatCodePoint(curChar));
                 }
             }
             advance();
@@ -244,15 +300,16 @@ MicroXML.parse = function(source) {
 	var name = source.slice(startPos, pos);
         // Give the error has early as possible so that the position is correct
         if (attributeMap.hasOwnProperty(name))
-            error("duplicateAttribute", name);
+            posError(startPos, pos, "duplicate attribute \"%1\"", name);
 	while (tryS())
 	    ;
 	expect("=");
 	while (tryS())
 	    ;
 	if (curChar !== '"' && curChar !== "'")
-	    error("unquotedAttribute");
+	    error("attribute value is missing opening quote");
 	var quote = curChar;
+        var quotePos = pos;
 	advance();
 	var value = "";
         for (;;) {
@@ -264,10 +321,12 @@ MicroXML.parse = function(source) {
             }
             switch (curChar) {
                 case "":
+                    posError(quotePos, pos, "attribute value without closing quote");
+                    break;
                 case "<":
-                    error("missingQuote");
+                    error("\"<\" in attribute value (missing closing quote?)");
                 case ">":
-                    error("unescapedGtAttributeValue");
+                    error("\">\" characters must always be escaped, including in attribute values");
                 case "&":
                     advance();
                     value += parseCharRef();
@@ -280,7 +339,7 @@ MicroXML.parse = function(source) {
                     break;
                 default:
                     if (curChar < " ")
-                        error("controlChar");
+                        error("control character #x%1 not allowed", formatCodePoint(curChar));
                 /* fall through */
                 case "\n":
                 case "\t":
@@ -320,7 +379,7 @@ MicroXML.parse = function(source) {
                     if (tryChar("/")) {
                         var endName = parseName();
                         if (endName !== name)
-                            error("endTagMismatch", name, endName);
+                            posError(pos - endName.length, pos, "name \"%2\" in end-tag does not match name \"%1\" in start-tag", name, endName);
                         while (tryS())
                             ;
                         expect(">");
@@ -350,13 +409,14 @@ MicroXML.parse = function(source) {
                     text += "\n";
                     break;
                 case ">":
-                    error("unescapedGtContent");
+                    error("\">\" characters must always be escaped");
+                    break;
                 case "":
-                    error("missingEndTag", name);
+                    error("missing end-tag \"%1\"", name);
                     break;
                 default:
                     if (curChar < " ")
-                        error("controlChar");
+                        error("control character #x%1 not allowed", formatCodePoint(curChar));
                 /* fall through */
                 case "\n":
                 case "\t":

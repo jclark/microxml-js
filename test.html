@@ -5,26 +5,30 @@
     <script src="microxml.js"></script>
     <script>
         function parseText() {
-            var textarea = document.forms.parse.elements.text;
+            var textarea = document.getElementById("text");
             try {
-                document.getElementById("result").textContent = "Correct"
+                document.getElementById("result").textContent = "Correct";
                 document.getElementById("json").textContent = JSON.stringify(MicroXML.parse(textarea.value));
             }
             catch (exc) {
-                if (exc.name === "ParseError") {
-                    document.getElementById("result").textContent = "Incorrect (" + exc.errorType + ")";
-                    document.getElementById("json").textContent = "";
-                    textarea.setSelectionRange(exc.position, exc.position);
+                document.getElementById("json").textContent = "";
+                var message;
+                if (exc.origin === "MicroXML") {
+                    message = "Parse error: " + exc.message + ".";
+                    textarea.setSelectionRange(exc.startPosition, exc.endPosition);
                     textarea.focus();
                 }
+                else
+                    message = "Internal error: " + exc.toString() + ".";
+                document.getElementById("result").textContent = message;
             }
         }
    </script>
 </head>
 <body>
 <h1>MicroXML Parser Test</h1>
-<form name="parse" >
-<textarea name="text" rows="10" cols="80">&lt;doc>&lt;/doc></textarea>
+<form>
+<textarea id="text" rows="10" cols="80">&lt;doc>&lt;/doc></textarea>
 <input type="button" value="Parse" onclick="parseText();">
 </form>
 <p id="result"></p>
