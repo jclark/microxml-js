@@ -2,8 +2,6 @@ var MicroXML = { };
 /*
 TODO:
 Comments
-Illegal characters
-Surrogates
 Unicode names
 */
 MicroXML.parse = function(source) {
@@ -125,7 +123,38 @@ MicroXML.parse = function(source) {
         }
     }
 
-    /* current char is whitespace before attribute
+   /* precondition: curChar > ">"
+       post: curChar <= ">" */
+    var parseSafeChars = function() {
+        var startPos = pos;
+        do {
+            if (curChar >= "\u007F") {
+                if (curChar <= "\u009F")
+                    error("controlChar");
+                if (curChar >= "\uD800") {
+                    if (curChar <= "\uDFFF") {
+                        if (curChar >= "\uDC00" || pos + 1 === source.length)
+                            error("invalidSurrogatePair");
+                        var code2 = source.charCodeAt(pos + 1);
+                        if (code2 < 0xDC00 || code2 > 0xDFFF)
+                            error("invalidSurrogatePair");
+                        if ((code2 & 0x3FE) == 0x3FE) {
+                            var code1 = curChar.charCodeAt(0);
+                            if ((code1 & 0x3F) === 0x3F)
+                                error("nonCharacter");
+                        }
+                        advance();
+                    }
+                    else if (curChar >= "\uFDD0" && (curChar <= "\uFDEF" || curChar >= "\uFFFE"))
+                        error("nonCharacter");
+                }
+            }
+            advance();
+        } while (curChar > ">");
+        return source.slice(startPos, pos);
+    }
+
+    /* current char is whitespace before attribute;
      return true if attribute was parsed */
     var tryParseAttribute = function(attributeMap) {
 	if (!tryS())
@@ -151,7 +180,13 @@ MicroXML.parse = function(source) {
 	var quote = curChar;
 	advance();
 	var value = "";
-	while (curChar !== quote) {
+        for (;;) {
+            if (curChar > ">")
+                value += parseSafeChars();
+            if (curChar === quote) {
+                advance();
+                break;
+            }
             switch (curChar) {
                 case "":
                 case "<":
@@ -169,12 +204,16 @@ MicroXML.parse = function(source) {
                     value += "\n";
                     break;
                 default:
+                    if (curChar < " ")
+                        error("controlChar");
+                /* fall through */
+                case "\n":
+                case "\t":
                     value += curChar;
                     advance();
                     break;
             }
-	}
-	advance();
+        }
         if (name === "__proto__")
             Object.defineProperty(attributeMap, name,
                 {value: value, enumerable: true, writable:true, configurable:true});
@@ -198,6 +237,8 @@ MicroXML.parse = function(source) {
 	expect(">");
 
 	for (;;) {
+            if (curChar > ">")
+                text += parseSafeChars();
             switch (curChar) {
                 case "<":
                     advance();
@@ -236,6 +277,11 @@ MicroXML.parse = function(source) {
                     error("missingEndTag", name);
                     break;
                 default:
+                    if (curChar < " ")
+                        error("controlChar");
+                /* fall through */
+                case "\n":
+                case "\t":
                     text += curChar;
                     advance();
                     break;
