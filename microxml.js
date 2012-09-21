@@ -1,8 +1,7 @@
 var MicroXML = { };
 /*
 TODO:
-Comments
-Unicode names
+Better errors
 */
 MicroXML.parse = function(source) {
     "use strict";
@@ -48,39 +47,100 @@ MicroXML.parse = function(source) {
 	return false;
     };
 
-    var nameStartCharRegexp = /^[A-Za-z_]$/;
+    /* These regexes don't include surrogates; we handle these separately. */
+    var nameStartCharRegexp = /^[A-Za-z_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u0037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
+    var nameCharRegexp = /^[-A-Za-z_0-9.\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u0037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
 
     var tryNameStartChar = function() {
 	if (nameStartCharRegexp.test(curChar)) {
 	    advance();
 	    return true;
 	}
-	return false;
+	return tryNameSurrogate();
     };
 
-    var nameCharRegexp = /^[-._A-Za-z0-9]$/;
 
     var tryNameChar = function() {
 	if (nameCharRegexp.test(curChar)) {
 	    advance();
 	    return true;
 	}
-	return false;
+	return tryNameSurrogate();
+    };
+
+    var tryNameSurrogate = function() {
+        if (curChar < "\uD800" || curChar > "\uDB7F" || pos + 1 === source.length)
+            return false;
+        var code2 = source.charCodeAt(pos + 1);
+        if ((code2 & 0x3FE) === 0x3FE) {
+            var code1 = curChar.charCodeAt(0);
+            if ((code1 & 0x3F) === 0x3F)
+                return false;
+        }
+        pos += 2;
+        curChar = source.charAt(pos);
+        return true;
     };
 
     var parseDocument = function() {
 	var result;
 	if (curChar === "\uFEFF")
 	    advance();
-	while (tryS())
-	    ;
-	expect("<");
+        for (;;) {
+            while (tryS())
+                ;
+            expect("<");
+            if (curChar !== "!")
+                break;
+            advance();
+            parseComment();
+        }
 	result = parseElement();
-	while (tryS())
-	    ;
-	if (curChar !== "")
-	    error("syntax");
+        for (;;) {
+            while (tryS())
+                ;
+            if (curChar === "")
+                return result;
+            if (curChar !== "<")
+                break;
+            advance();
+            if (!tryChar("!"))
+                break;
+            parseComment();
+        }
+        error("onlyCommentAfterDocumentElement");
 	return result;
+    };
+
+    /* precondition: current char is after "!"
+    postcondition: current char is after closing ">"
+     */
+    var parseComment = function() {
+        expect("-");
+        expect("-");
+        for (;;) {
+            if (curChar > ">")
+                parseSafeChars();
+            switch (curChar) {
+                case "":
+                    error("missingCommentClose");
+                case "-":
+                    advance();
+                    if (tryChar("-")) {
+                        expect(">");
+                        return;
+                    }
+                    break;
+                default:
+                    if (curChar < " ")
+                        error("controlChar");
+                    /* fall through */
+                case "\n":
+                case "\r":
+                case "\t":
+                    advance();
+            }
+        }
     };
 
     var parseName = function() {
@@ -104,14 +164,29 @@ MicroXML.parse = function(source) {
             var hexNumber = source.slice(startPos, pos);
             expect(";");
             var codePoint = parseInt(hexNumber, 16);
-            if (codePoint > 0x10FFFF)
-                error("codePointTooBig", hexNumber);
-            if (codePoint < 0x10000)
-                return String.fromCharCode(codePoint);
-            if ((codePoint & 0xFFFE) === 0xFFFE)
-                error("nonCharacterCodePoint", hexNumber);
-            codePoint -= 0x10000;
-            return String.fromCharCode((codePoint >> 10) | 0xD800, (codePoint & 0x3FF) | 0xDC00);
+            if (codePoint < 0x7F) {
+                if (codePoint < " ") {
+                    if (codePoint !== "\n" && codePoint !== "\t")
+                        error("c0ControlCharRef", hexNumber);
+                }
+            }
+            else if (codePoint >= 0xD800) {
+                if (codePoint >= 0x10000) {
+                    if (codePoint > 0x10FFFF)
+                        error("codePointTooBig", hexNumber);
+                    if ((codePoint & 0xFFFE) === 0xFFFE)
+                        error("nonCharacterCharRef", hexNumber);
+                    codePoint -= 0x10000;
+                    return String.fromCharCode((codePoint >> 10) | 0xD800, (codePoint & 0x3FF) | 0xDC00);
+                }
+                if (codePoint <= 0xDFFF)
+                    error("surrogateCharRef", hexNumber);
+                if (codePoint >= 0xFDD0 && (codePoint <= 0xFDEF || codePoint >= 0xFFFE))
+                    error("nonCharacterCharRef", hexNumber);
+            }
+            else if (codePoint <= 0x9F)
+                error("c1ControlCharRef", hexNumber);
+            return String.fromCharCode(codePoint);
         }
         else {
             var name = parseName();
@@ -138,7 +213,7 @@ MicroXML.parse = function(source) {
                         var code2 = source.charCodeAt(pos + 1);
                         if (code2 < 0xDC00 || code2 > 0xDFFF)
                             error("invalidSurrogatePair");
-                        if ((code2 & 0x3FE) == 0x3FE) {
+                        if ((code2 & 0x3FE) === 0x3FE) {
                             var code1 = curChar.charCodeAt(0);
                             if ((code1 & 0x3F) === 0x3F)
                                 error("nonCharacter");
@@ -252,6 +327,9 @@ MicroXML.parse = function(source) {
                         if (text)
                             content.push(text);
                         return [name, attributeMap, content];
+                    }
+                    else if (tryChar("!")) {
+                        parseComment();
                     }
                     else {
                         if (text) {
