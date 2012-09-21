@@ -368,6 +368,11 @@ MicroXML.parse = function(source) {
 	
 	while (tryParseAttribute(attributeMap))
 	    ;
+
+        if (tryChar("/")) {
+            expect(">");
+            return [name, attributeMap, content];
+        }
 	expect(">");
 
 	for (;;) {
