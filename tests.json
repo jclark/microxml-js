@@ -1,0 +1,342 @@
+[
+    {
+	"id": "0001",
+	"source": "<doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0002",
+	"source": "<doc/>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0003",
+	"source": "\uFEFF<doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0004",
+	"source": "\n\r\t <doc></doc>\n\r\t ",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0005",
+	"source": "<doc att='val'/>",
+	"result": ["doc",{"att": "val"},[]]
+    },
+    {
+	"id": "0006",
+	"source": "<doc att='val'/>",
+	"result": ["doc",{"att": "val"},[]]
+    },
+    {
+	"id": "0007",
+	"source": "<doc att=''/>",
+	"result": ["doc",{"att": ""},[]]
+    },
+    {
+	"id": "0008",
+	"source": "<doc att1='val1' att2='val2'/>",
+	"result": ["doc",{"att1": "val1", "att2": "val2"},[]]
+    },
+    {
+	"id": "0009",
+	"source": "<doc att='\"'/>",
+	"result": ["doc",{"att": "\""},[]]
+    },
+    {
+	"id": "0010",
+	"source": "<doc att=\"'\"/>",
+	"result": ["doc",{"att": "'"},[]]
+    },
+    {
+	"id": "0011",
+	"source": "<doc \n\r\r\n\t/>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0012",
+	"source": "<doc \n\r\r\n\t></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0013",
+	"source": "<doc></doc \n\r\r\n\t>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0014",
+	"source": "<doc \n\r\r\n\t/>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0015",
+	"source": "<doc><p></p></doc>",
+	"result": ["doc",{},[["p",{},[]]]]
+    },
+    {
+	"id": "0016",
+	"source": "<doc><p/></doc>",
+	"result": ["doc",{},[["p",{},[]]]]
+    },
+    {
+	"id": "0017",
+	"source": "<doc>foo</doc>",
+	"result": ["doc",{},["foo"]]
+    },
+    {
+	"id": "0018",
+	"source": ""
+    },
+    {
+	"id": "0019",
+	"source": "foo"
+    },
+    {
+	"id": "0020",
+	"source": "<doc>"
+    },
+    {
+	"id": "0021",
+	"source": "< doc></doc>"
+    },
+    {
+	"id": "0022",
+	"source": "<doc att=val/>"
+    },
+    {
+	"id": "0023",
+	"source": "<doc></document>"
+    },
+    {
+	"id": "0024",
+	"source": "<doc><foo><bar></foo></bar></doc>"
+    },
+    {
+	"id": "0025",
+	"source": "<doc></doc"
+    },
+    {
+	"id": "0026",
+	"source": "<doc></doc"
+    },
+    {
+	"id": "0027",
+	"source": "</>"
+    },
+    {
+	"id": "0028",
+	"source": "<></>"
+    },
+    {
+	"id": "0029",
+	"source": "<?xml version=\"1.0\"?>\n<doc></doc>"
+    },
+    {
+	"id": "0030",
+	"source": "<?pi value?><doc></doc>"
+    },
+    {
+	"id": "0031",
+	"source": "<!DOCTYPE html><html></html>"
+    },
+    {
+	"id": "0032",
+	"source": "<doc><![CDATA[stuff]]></doc>"
+    },
+    {
+	"id": "0033",
+	"source": "<doc xmlns='http://www.w3.org'></doc>"
+    },
+    {
+	"id": "0034",
+	"source": "<doc xml:lang='en'/>"
+    },
+    {
+	"id": "0035",
+	"source": "<doc>2>1</doc>"
+    },
+    {
+	"id": "0036",
+	"source": "<doc att='2>1'/>"
+    },
+    {
+	"id": "0037",
+	"source": "<doc>&#120;</doc>"
+    },
+    {
+	"id": "0038",
+	"source": "<doc>\u0080</doc>"
+    },
+    {
+	"id": "0039",
+	"source": "<doc>&#xD;</doc>"
+    },
+    {
+	"id": "0040",
+	"source": "<doc>x\r\ny</doc>",
+	"result": ["doc",{},["x\ny"]]
+    },
+    {
+	"id": "0041",
+	"source": "<doc att='x\r\ny'/>",
+	"result": ["doc",{"att": "x\ny"},[]]
+    },
+    {
+	"id": "0042",
+	"source": "<doc>x\ry</doc>",
+	"result": ["doc",{},["x\ny"]]
+    },
+    {
+	"id": "0043",
+	"source": "<doc att='x\ry'/>",
+	"result": ["doc",{"att": "x\ny"},[]]
+    },
+    {
+	"id": "0044",
+	"source": "<!-- a document --><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0045",
+	"source": "<doc></doc><!-- the end -->",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0046",
+	"source": "<doc><!--empty--></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0047",
+	"source": "<!--Multi\r\nline--><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0048",
+	"source": "<!----><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0049",
+	"source": "<!---x-y--><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0050",
+	"source": "<!--x--y--><doc></doc>"
+    },
+    {
+	"id": "0051",
+	"source": "<doc att='x\ty'/>",
+	"result": ["doc",{"att": "x\ty"},[]]
+    },
+    {
+	"id": "0052",
+	"source": "<doc att='x\ny'/>",
+	"result": ["doc",{"att": "x\ny"},[]]
+    },
+    {
+	"id": "0053",
+	"source": "<abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/>",
+	"result": ["abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",{},[]]
+    },
+    {
+	"id": "0054",
+	"source": "<_-./>",
+	"result": ["_-.",{},[]]
+    },
+    {
+	"id": "0055",
+	"source": "<-/>"
+    },
+    {
+	"id": "0056",
+	"source": "<./>"
+    },
+    {
+	"id": "0057",
+	"source": "<9/>"
+    },
+    {
+	"id": "0058",
+	"source": "<x$/>"
+    },
+    {
+	"id": "0059",
+	"source": "<doc att='val1' att='val2'/>"
+    },
+    {
+	"id": "0060",
+	"source": "<doc></DOC>"
+    },
+    {
+	"id": "0061",
+	"source": "<doc att='val' att='val'/>"
+    },
+    {
+	"id": "0062",
+	"source": "<doc att='val' ATT='VAL'/>",
+	"result": ["doc",{"att": "val", "ATT": "VAL"},[]]
+    },
+    {
+	"id": "0063",
+	"comment": "There's some JavaScript weirdness with __proto__ properties",
+	"source": "<doc __proto__='val'/>",
+	"result": ["doc",{"__proto__": "val"},[]]
+    },
+    {
+	"id": "0064",
+	"source": "<doc __proto__='val' __proto__='val'/>"
+    },
+    {
+	"id": "0065",
+	"source": "<doc>&lt;&gt;&amp;&quot;&apos;</doc>",
+	"result": ["doc",{},["<>&\"'"]]
+    },
+    {
+	"id": "0066",
+	"source": "<doc att='&lt;&gt;&amp;&quot;&apos;'/>",
+	"result": ["doc",{"att": "<>&\"'"}, []]
+    },
+    {
+	"id": "0067",
+	"source": "<doc>&nbsp;</doc>"
+    },
+    {
+	"id": "0068",
+	"source": "<!--x---><doc></doc>"
+    },
+    {
+	"id": "0069",
+	"source": "<!-->--><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0070",
+	"source": "<!--->--><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0071",
+	"source": "<!----><doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0072",
+	"source": "<!-----><doc></doc>"
+    },
+    {
+	"id": "0073",
+	"source": "<!---><doc></doc>"
+    },
+    {
+	"id": "0074",
+	"source": "<\u0300/>"
+    },
+    {
+	"id": "0075",
+	"source": "<\u02FF/>",
+	"result": ["\u02FF",{},[]]
+    }
+ ]
