@@ -301,6 +301,8 @@ MicroXML.parse = function(source) {
         // Give the error has early as possible so that the position is correct
         if (attributeMap.hasOwnProperty(name))
             posError(startPos, pos, "duplicate attribute \"%1\"", name);
+        if (name === "xmlns")
+            posError(startPos, pos, "\"xmlns\" is not allowed as an attribute name");
 	while (tryS())
 	    ;
 	expect("=");
