@@ -247,7 +247,7 @@ MicroXML.parse = function(source) {
             expect(";");
             var ch = charNames[name];
             if (typeof(ch) !== "string")
-                posEerror(pos - name.length - 1, pos - 1, "unknown character name \"%1\"", name);
+                posError(pos - name.length - 1, pos - 1, "unknown character name \"%1\"", name);
             return ch;
         }
     }
@@ -299,7 +299,8 @@ MicroXML.parse = function(source) {
 	    ;
 	var name = source.slice(startPos, pos);
         // Give the error has early as possible so that the position is correct
-        if (attributeMap.hasOwnProperty(name))
+	// The typeof test is to work around a bug in SpiderMonkey 1.8.5 where ({}).hasOwnProperty("__proto__") == true
+        if (attributeMap.hasOwnProperty(name) && typeof(attributeMap[name]) === "string")
             posError(startPos, pos, "duplicate attribute \"%1\"", name);
         if (name === "xmlns")
             posError(startPos, pos, "\"xmlns\" is not allowed as an attribute name");
