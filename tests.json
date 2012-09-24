@@ -338,5 +338,16 @@
 	"id": "0075",
 	"source": "<\u02FF/>",
 	"result": ["\u02FF",{},[]]
+    },
+    {
+	"id": "0076",
+	"comment": "This is #x10FFFF (the maximum code point), which is a noncharacter",
+	"source": "<doc>\uDBFF\uDFFF</doc>"
+    },
+    {
+	"id": "0077",
+	"comment": "This is #x10FFFD, the maximum code point that is not a noncharacter",
+	"source": "<doc>\uDBFF\uDFFD</doc>",
+	"result": ["doc",{},["\uDBFF\uDFFD"]]
     }
  ]
