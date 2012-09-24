@@ -5,24 +5,24 @@ MicroXML.parse = function(source) {
     var pos = 0;
     var curChar = source.charAt(0);
 
-    var error = function(template) {
+    function error(template) {
         var args = [];
         var i;
         for (i = 1; i < arguments.length; ++i)
             args.push(arguments[i]);
         doError(pos, pos === source.length ? pos : pos + 1, template, args);
-    };
+    }
 
     // Report an error with an explicit associated position.
-    var posError = function(startPos, endPos, template) {
+    function posError(startPos, endPos, template) {
         var args = [];
         var i;
         for (i = 3; i < arguments.length; ++i)
             args.push(arguments[i]);
         doError(startPos, endPos, template, args);
-    };
+    }
 
-    var doError = function (startPos, endPos, template, args) {
+    function doError(startPos, endPos, template, args) {
         throw({
             origin: "MicroXML",
             message: subst(template, args),
@@ -32,9 +32,9 @@ MicroXML.parse = function(source) {
             args: args,
             subst: subst
         });
-    };
+    }
 
-    var subst = function(str, args) {
+    function subst(str, args) {
         var res = "";
         var start = 0;
         for (;;) {
@@ -66,60 +66,60 @@ MicroXML.parse = function(source) {
             start = i + 2;
         }
         return res;
-    };
+    }
 
-    var formatCodePoint = function(ch) {
+    function formatCodePoint(ch) {
         return ch.charCodeAt(0).toString(16).toUpperCase();
-    };
+    }
 
-    var advance = function() {
+    function advance() {
 	curChar = source.charAt(++pos);
-    };
+    }
 
-    var expect = function(ch) {
+    function expect(ch) {
 	if (curChar != ch)
 	    error("expected \"%1\"", ch);
 	advance();
-    };
+    }
 
-    var tryChar = function(ch) {
+    function tryChar(ch) {
 	if (curChar === ch) {
 	    advance();
 	    return true;
 	}
 	return false;
-    };
+    }
 
-    var tryS = function() {
+    function tryS() {
 	if (curChar === ' ' || curChar === '\r' || curChar === '\n' || curChar === '\t') {
 	    advance();
 	    return true;
 	}
 	return false;
-    };
+    }
 
     /* These regexes don't include surrogates; we handle these separately. */
     var nameStartCharRegexp = /^[A-Za-z_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u0037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
     var nameCharRegexp = /^[-A-Za-z_0-9.\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u0037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
 
-    var tryNameStartChar = function() {
+    function tryNameStartChar() {
 	if (nameStartCharRegexp.test(curChar)) {
 	    advance();
 	    return true;
 	}
 	return tryNameSurrogate();
-    };
+    }
 
 
-    var tryNameChar = function() {
+    function tryNameChar() {
 	if (nameCharRegexp.test(curChar)) {
 	    advance();
 	    return true;
 	}
 	return tryNameSurrogate();
-    };
+    }
 
-    var tryNameSurrogate = function() {
+    function tryNameSurrogate() {
         if (curChar < "\uD800" || curChar > "\uDB7F" || pos + 1 === source.length)
             return false;
         var code2 = source.charCodeAt(pos + 1);
@@ -131,9 +131,9 @@ MicroXML.parse = function(source) {
         pos += 2;
         curChar = source.charAt(pos);
         return true;
-    };
+    }
 
-    var parseDocument = function() {
+    function parseDocument() {
 	var result;
 	if (curChar === "\uFEFF")
 	    advance();
@@ -161,12 +161,12 @@ MicroXML.parse = function(source) {
         }
         error("only comments and white space are allowed after the document element");
 	return result;
-    };
+    }
 
     /* precondition: current char is after "!"
     postcondition: current char is after closing ">"
      */
-    var parseComment = function() {
+    function parseComment() {
         expect("-");
         expect("-");
         for (;;) {
@@ -192,21 +192,21 @@ MicroXML.parse = function(source) {
                     advance();
             }
         }
-    };
+    }
 
-    var parseName = function() {
+    function parseName() {
 	var startPos = pos;
 	if (!tryNameStartChar())
 	    error("invalid name start character");
 	while (tryNameChar())
 	    ;
 	return source.slice(startPos, pos);
-    };
+    }
 
     var hexCharRegexp = /^[a-fA-F0-9]$/;
     var charNames = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'"};
 
-    var parseCharRef = function() {
+    function parseCharRef() {
         if (tryChar("#")) {
             expect("x");
             var startPos = pos;
@@ -214,7 +214,7 @@ MicroXML.parse = function(source) {
                 advance();
             var hexNumber = source.slice(startPos, pos);
             expect(";");
-            var charRefError = function(template) {
+            var charRefError = function (template) {
                 posError(startPos, pos - 1, template, hexNumber);
             };
             var codePoint = parseInt(hexNumber, 16);
@@ -246,15 +246,15 @@ MicroXML.parse = function(source) {
             var name = parseName();
             expect(";");
             var ch = charNames[name];
-            if (typeof(ch) != "string")
+            if (typeof(ch) !== "string")
                 posEerror(pos - name.length - 1, pos - 1, "unknown character name \"%1\"", name);
             return ch;
         }
-    };
+    }
 
    /* precondition: curChar > ">"
        post: curChar <= ">" */
-    var parseSafeChars = function() {
+    function parseSafeChars() {
         var startPos = pos;
         do {
             if (curChar >= "\u007F") {
@@ -283,11 +283,11 @@ MicroXML.parse = function(source) {
             advance();
         } while (curChar > ">");
         return source.slice(startPos, pos);
-    };
+    }
 
     /* current char is whitespace before attribute;
      return true if attribute was parsed */
-    var tryParseAttribute = function(attributeMap) {
+    function tryParseAttribute(attributeMap) {
 	if (!tryS())
 	    return false;
 	while (tryS())
@@ -354,18 +354,18 @@ MicroXML.parse = function(source) {
         else
 	    attributeMap[name] = value;
 	return true;
-    };
+    }
 
     /* precondition: current char is character after "<";
        postcondition: current char is character after ">"
        returns data model for element */
 
-    var parseElement = function() {
+    function parseElement() {
 	var name = parseName();
 	var content = [];
 	var attributeMap = { };
 	var text = "";
-	
+
 	while (tryParseAttribute(attributeMap))
 	    ;
 
@@ -430,7 +430,7 @@ MicroXML.parse = function(source) {
                     break;
             }
 	}
-    };
+    }
     
     return parseDocument();
 };
