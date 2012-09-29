@@ -1,6 +1,6 @@
 var MicroXML = { };
 
-MicroXML.parse = function(source) {
+MicroXML.parse = function (source) {
     "use strict";
     var pos = 0;
     var curChar = source.charAt(0);
@@ -23,7 +23,7 @@ MicroXML.parse = function(source) {
     }
 
     function doError(startPos, endPos, template, args) {
-        throw({
+        throw ({
             origin: "MicroXML",
             message: subst(template, args),
             startPosition: startPos,
@@ -77,46 +77,45 @@ MicroXML.parse = function(source) {
     }
 
     function expect(ch) {
-	if (curChar != ch)
-	    error("expected \"%1\"", ch);
-	advance();
+        if (curChar !== ch)
+            error("expected \"%1\"", ch);
+        advance();
     }
 
     function tryChar(ch) {
-	if (curChar === ch) {
-	    advance();
-	    return true;
-	}
-	return false;
+        if (curChar === ch) {
+            advance();
+            return true;
+        }
+        return false;
     }
 
     function tryS() {
-	if (curChar === ' ' || curChar === '\r' || curChar === '\n' || curChar === '\t') {
-	    advance();
-	    return true;
-	}
-	return false;
+        if (curChar === ' ' || curChar === '\r' || curChar === '\n' || curChar === '\t') {
+            advance();
+            return true;
+        }
+        return false;
     }
 
     /* These regexes don't include surrogates; we handle these separately. */
     var nameStartCharRegexp = /^[A-Za-z_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
-    var nameCharRegexp = /^[-A-Za-z_0-9.\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
+    var nameCharRegexp = /^[A-Za-z_0-9.\-\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]$/;
 
     function tryNameStartChar() {
-	if (nameStartCharRegexp.test(curChar)) {
-	    advance();
-	    return true;
-	}
-	return tryNameSurrogate();
+        if (nameStartCharRegexp.test(curChar)) {
+            advance();
+            return true;
+        }
+        return tryNameSurrogate();
     }
 
-
     function tryNameChar() {
-	if (nameCharRegexp.test(curChar)) {
-	    advance();
-	    return true;
-	}
-	return tryNameSurrogate();
+        if (nameCharRegexp.test(curChar)) {
+            advance();
+            return true;
+        }
+        return tryNameSurrogate();
     }
 
     function tryNameSurrogate() {
@@ -134,9 +133,9 @@ MicroXML.parse = function(source) {
     }
 
     function parseDocument() {
-	var result;
-	if (curChar === "\uFEFF")
-	    advance();
+        var result;
+        if (curChar === "\uFEFF")
+            advance();
         for (;;) {
             while (tryS())
                 ;
@@ -146,7 +145,7 @@ MicroXML.parse = function(source) {
             advance();
             parseComment();
         }
-	result = parseElement();
+        result = parseElement();
         for (;;) {
             while (tryS())
                 ;
@@ -160,11 +159,11 @@ MicroXML.parse = function(source) {
             parseComment();
         }
         error("only comments and white space are allowed after the document element");
-	return result;
+        return result;
     }
 
     /* precondition: current char is after "!"
-    postcondition: current char is after closing ">"
+     postcondition: current char is after closing ">"
      */
     function parseComment() {
         expect("-");
@@ -175,6 +174,7 @@ MicroXML.parse = function(source) {
             switch (curChar) {
                 case "":
                     error("missing comment close \"-->\"");
+                    break;
                 case "-":
                     advance();
                     if (tryChar("-")) {
@@ -182,25 +182,27 @@ MicroXML.parse = function(source) {
                         return;
                     }
                     break;
-                default:
-                    if (curChar < " ")
-                        error("control character #x%1 not allowed", formatCodePoint(curChar));
-                    /* fall through */
                 case "\n":
                 case "\r":
                 case "\t":
                     advance();
+                    break;
+                default:
+                    if (curChar < " ")
+                        error("control character #x%1 not allowed", formatCodePoint(curChar));
+                    advance();
+                    break;
             }
         }
     }
 
     function parseName() {
-	var startPos = pos;
-	if (!tryNameStartChar())
-	    error("invalid name start character");
-	while (tryNameChar())
-	    ;
-	return source.slice(startPos, pos);
+        var startPos = pos;
+        if (!tryNameStartChar())
+            error("invalid name start character");
+        while (tryNameChar())
+            ;
+        return source.slice(startPos, pos);
     }
 
     var hexCharRegexp = /^[a-fA-F0-9]$/;
@@ -252,8 +254,8 @@ MicroXML.parse = function(source) {
         }
     }
 
-   /* precondition: curChar > ">"
-       post: curChar <= ">" */
+    /* precondition: curChar > ">"
+     post: curChar <= ">" */
     function parseSafeChars() {
         var startPos = pos;
         do {
@@ -288,33 +290,33 @@ MicroXML.parse = function(source) {
     /* current char is whitespace before attribute;
      return true if attribute was parsed */
     function tryParseAttribute(attributeMap) {
-	if (!tryS())
-	    return false;
-	while (tryS())
-	    ;
-	var startPos = pos;
-	if (!tryNameStartChar())
-	    return false;
-	while (tryNameChar())
-	    ;
-	var name = source.slice(startPos, pos);
+        if (!tryS())
+            return false;
+        while (tryS())
+            ;
+        var startPos = pos;
+        if (!tryNameStartChar())
+            return false;
+        while (tryNameChar())
+            ;
+        var name = source.slice(startPos, pos);
         // Give the error has early as possible so that the position is correct
-	// The typeof test is to work around a bug in SpiderMonkey 1.8.5 where ({}).hasOwnProperty("__proto__") == true
+        // The typeof test is to work around a bug in SpiderMonkey 1.8.5 where ({}).hasOwnProperty("__proto__") == true
         if (attributeMap.hasOwnProperty(name) && typeof(attributeMap[name]) === "string")
             posError(startPos, pos, "duplicate attribute \"%1\"", name);
         if (name === "xmlns")
             posError(startPos, pos, "\"xmlns\" is not allowed as an attribute name");
-	while (tryS())
-	    ;
-	expect("=");
-	while (tryS())
-	    ;
-	if (curChar !== '"' && curChar !== "'")
-	    error("attribute value is missing opening quote");
-	var quote = curChar;
+        while (tryS())
+            ;
+        expect("=");
+        while (tryS())
+            ;
+        if (curChar !== '"' && curChar !== "'")
+            error("attribute value is missing opening quote");
+        var quote = curChar;
         var quotePos = pos;
-	advance();
-	var value = "";
+        advance();
+        var value = "";
         for (;;) {
             if (curChar > ">")
                 value += parseSafeChars();
@@ -328,8 +330,10 @@ MicroXML.parse = function(source) {
                     break;
                 case "<":
                     error("\"<\" in attribute value (missing closing quote?)");
+                    break;
                 case ">":
                     error("\">\" characters must always be escaped, including in attribute values");
+                    break;
                 case "&":
                     advance();
                     value += parseCharRef();
@@ -340,12 +344,14 @@ MicroXML.parse = function(source) {
                         advance();
                     value += "\n";
                     break;
+                case "\n":
+                case "\t":
+                    value += curChar;
+                    advance();
+                    break;
                 default:
                     if (curChar < " ")
                         error("control character #x%1 not allowed", formatCodePoint(curChar));
-                /* fall through */
-                case "\n":
-                case "\t":
                     value += curChar;
                     advance();
                     break;
@@ -355,30 +361,30 @@ MicroXML.parse = function(source) {
             Object.defineProperty(attributeMap, name,
                 {value: value, enumerable: true, writable:true, configurable:true});
         else
-	    attributeMap[name] = value;
-	return true;
+            attributeMap[name] = value;
+        return true;
     }
 
     /* precondition: current char is character after "<";
-       postcondition: current char is character after ">"
-       returns data model for element */
+     postcondition: current char is character after ">"
+     returns data model for element */
 
     function parseElement() {
-	var name = parseName();
-	var content = [];
-	var attributeMap = { };
-	var text = "";
+        var name = parseName();
+        var content = [];
+        var attributeMap = { };
+        var text = "";
 
-	while (tryParseAttribute(attributeMap))
-	    ;
+        while (tryParseAttribute(attributeMap))
+            ;
 
         if (tryChar("/")) {
             expect(">");
             return [name, attributeMap, content];
         }
-	expect(">");
+        expect(">");
 
-	for (;;) {
+        for (;;) {
             if (curChar > ">")
                 text += parseSafeChars();
             switch (curChar) {
@@ -422,19 +428,21 @@ MicroXML.parse = function(source) {
                 case "":
                     error("missing end-tag \"%1\"", name);
                     break;
-                default:
-                    if (curChar < " ")
-                        error("control character #x%1 not allowed", formatCodePoint(curChar));
-                /* fall through */
                 case "\n":
                 case "\t":
                     text += curChar;
                     advance();
                     break;
+                default:
+                    if (curChar < " ")
+                        error("control character #x%1 not allowed", formatCodePoint(curChar));
+                    text += curChar;
+                    advance();
+                    break;
             }
-	}
+        }
     }
-    
+
     return parseDocument();
 };
 
