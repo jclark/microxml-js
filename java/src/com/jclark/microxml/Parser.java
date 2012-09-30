@@ -10,7 +10,6 @@ import java.io.IOException;
  */
 public abstract class Parser {
     private Event event = null;
-    private ErrorHandler errorHandler = null;
 
     public abstract boolean advance() throws IOException, ParseException;
 
@@ -21,12 +20,6 @@ public abstract class Parser {
         return event;
     }
 
-    public void setErrorHandler(ErrorHandler eh) {
-        this.errorHandler = eh;
-    }
-
-    public ErrorHandler getErrorHandler() {
-        return errorHandler;
-    }
-
+    public abstract void setErrorHandler(ErrorHandler eh);
+    public abstract ErrorHandler getErrorHandler();
 }
