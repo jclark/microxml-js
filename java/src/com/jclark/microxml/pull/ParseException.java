@@ -1,4 +1,4 @@
-package com.jclark.microxml;
+package com.jclark.microxml.pull;
 
 /**
  * @author <a href="mailto:jjc@jclark.com">James Clark</a>

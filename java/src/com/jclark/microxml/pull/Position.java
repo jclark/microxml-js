@@ -1,4 +1,4 @@
-package com.jclark.microxml;
+package com.jclark.microxml.pull;
 
 /**
  * Represents a position in the source document.
