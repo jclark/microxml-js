@@ -3,5 +3,7 @@ about MicroXML.
 
 The js/ directory contains a simple MicroXML parser in JavaScript.
 
+The java/directory contains the beginnings of a MicroXML parser in Java.
+
 James Clark
 jjc@jclark.com
