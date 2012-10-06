@@ -137,8 +137,7 @@ MicroXML.parse = function (source) {
         if (curChar === "\uFEFF")
             advance();
         for (;;) {
-            while (tryS())
-                ;
+            while (tryS()) {}
             expect("<");
             if (curChar !== "!")
                 break;
@@ -147,8 +146,7 @@ MicroXML.parse = function (source) {
         }
         result = parseElement();
         for (;;) {
-            while (tryS())
-                ;
+            while (tryS()) {}
             if (curChar === "")
                 return result;
             if (curChar !== "<")
@@ -200,8 +198,7 @@ MicroXML.parse = function (source) {
         var startPos = pos;
         if (!tryNameStartChar())
             error("invalid name start character");
-        while (tryNameChar())
-            ;
+        while (tryNameChar()) {}
         return source.slice(startPos, pos);
     }
 
@@ -241,7 +238,7 @@ MicroXML.parse = function (source) {
                     charRefError("reference to noncharacter code point #x%1 not allowed");
             }
             else if (codePoint <= 0x9F)
-                charRefError("reference to C1 control character #x%1 not allowed", hexNumber);
+                charRefError("reference to C1 control character #x%1 not allowed");
             return String.fromCharCode(codePoint);
         }
         else {
@@ -292,13 +289,11 @@ MicroXML.parse = function (source) {
     function tryParseAttribute(attributeMap) {
         if (!tryS())
             return false;
-        while (tryS())
-            ;
+        while (tryS()) {}
         var startPos = pos;
         if (!tryNameStartChar())
             return false;
-        while (tryNameChar())
-            ;
+        while (tryNameChar()) {}
         var name = source.slice(startPos, pos);
         // Give the error has early as possible so that the position is correct
         // The typeof test is to work around a bug in SpiderMonkey 1.8.5 where ({}).hasOwnProperty("__proto__") == true
@@ -306,11 +301,9 @@ MicroXML.parse = function (source) {
             posError(startPos, pos, "duplicate attribute \"%1\"", name);
         if (name === "xmlns")
             posError(startPos, pos, "\"xmlns\" is not allowed as an attribute name");
-        while (tryS())
-            ;
+        while (tryS()) {}
         expect("=");
-        while (tryS())
-            ;
+        while (tryS()) {}
         if (curChar !== '"' && curChar !== "'")
             error("attribute value is missing opening quote");
         var quote = curChar;
@@ -375,8 +368,7 @@ MicroXML.parse = function (source) {
         var attributeMap = { };
         var text = "";
 
-        while (tryParseAttribute(attributeMap))
-            ;
+        while (tryParseAttribute(attributeMap)) {}
 
         if (tryChar("/")) {
             expect(">");
@@ -394,8 +386,7 @@ MicroXML.parse = function (source) {
                         var endName = parseName();
                         if (endName !== name)
                             posError(pos - endName.length, pos, "name \"%2\" in end-tag does not match name \"%1\" in start-tag", name, endName);
-                        while (tryS())
-                            ;
+                        while (tryS()) {}
                         expect(">");
                         if (text)
                             content.push(text);
