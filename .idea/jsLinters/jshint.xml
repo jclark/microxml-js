@@ -4,13 +4,12 @@
     <option noarg="true" />
     <option forin="true" />
     <option es5="true" />
-    <option strict="true" />
-    <option noempty="true" />
     <option undef="true" />
     <option eqeqeq="true" />
     <option nonew="true" />
     <option browser="true" />
     <option maxerr="100" />
+    <option predef="exports" />
   </component>
 </project>
 

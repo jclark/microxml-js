@@ -437,3 +437,20 @@ MicroXML.parse = function (source) {
     return parseDocument();
 };
 
+// This tries to make things work properly when running as a CommonJS module (e.g. under node.js),
+// or running at the top-level.
+
+(function() {
+    // This must not be in strict mode, because we are using this to access the global object.
+    var p;
+    // If the variable declaration of MicroXML above didn't set a property on the global object,
+    // and there is an in-scope exports variable, then add the MicroXML properties to exports.
+    if (this.MicroXML !== MicroXML && typeof(exports) !== "undefined") {
+        for (p in MicroXML) {
+            if (MicroXML.hasOwnProperty(p)) {
+                exports[p] = MicroXML[p];
+            }
+        }
+    }
+})();
+
