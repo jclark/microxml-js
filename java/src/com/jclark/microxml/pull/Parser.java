@@ -22,4 +22,7 @@ public abstract class Parser {
 
     public abstract void setErrorHandler(ErrorHandler eh);
     public abstract ErrorHandler getErrorHandler();
+    protected final void setEvent(Event event) {
+        this.event = event;
+    }
 }
