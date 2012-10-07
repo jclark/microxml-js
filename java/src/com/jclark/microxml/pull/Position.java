@@ -10,10 +10,10 @@ public final class Position {
      private final int lineNumber;
      private final int columnNumber;
 
-     public Position() {
-         index = -1;
-         lineNumber = -1;
-         columnNumber = -1;
+     public Position(long index, int lineNumber, int columnNumber) {
+         this.index = index;
+         this.lineNumber = lineNumber;
+         this.columnNumber = columnNumber;
      }
 
     /**
