@@ -1,5 +1,53 @@
 var MicroXML = { };
 
+MicroXML.ParseError = function (source, startPosition, endPosition, message, args) {
+    "use strict";
+    this.source = source;
+    this.startPosition = startPosition;
+    this.endPosition = endPosition;
+    this.message = this.subst(message, args);
+    this.rawMessage = message;
+    this.args = args;
+};
+
+MicroXML.ParseError.prototype = new SyntaxError();
+MicroXML.ParseError.prototype.constructor = MicroXML.ParseError;
+
+MicroXML.ParseError.prototype.subst = function subst(str, args) {
+    "use strict";
+    var res = "";
+    var start = 0;
+    for (;;) {
+        var i = str.indexOf('%', start);
+        if (i < 0) {
+            if (start === 0)
+                return str;
+            res += str.slice(start);
+            break;
+        }
+        res += str.slice(start, i);
+        var ch = str.charAt(i + 1);
+        if (ch === "") {
+            res += "%";
+            break;
+        }
+        if (ch >= "1" && ch <= "9") {
+            var argIndex = ch.charCodeAt(0) - "0".charCodeAt(0) - 1;
+            if (argIndex < args.length) {
+                res += args[argIndex];
+            }
+        }
+        else {
+            res += "%";
+            if (ch !== "%") {
+                res += ch;
+            }
+        }
+        start = i + 2;
+    }
+    return res;
+};
+
 MicroXML.parse = function (source) {
     "use strict";
     var pos = 0;
@@ -10,7 +58,7 @@ MicroXML.parse = function (source) {
         var i;
         for (i = 1; i < arguments.length; ++i)
             args.push(arguments[i]);
-        doError(pos, pos === source.length ? pos : pos + 1, template, args);
+        throw new MicroXML.ParseError(source, pos, pos === source.length ? pos : pos + 1, template, args);
     }
 
     // Report an error with an explicit associated position.
@@ -19,53 +67,7 @@ MicroXML.parse = function (source) {
         var i;
         for (i = 3; i < arguments.length; ++i)
             args.push(arguments[i]);
-        doError(startPos, endPos, template, args);
-    }
-
-    function doError(startPos, endPos, template, args) {
-        throw ({
-            origin: "MicroXML",
-            message: subst(template, args),
-            startPosition: startPos,
-            endPosition: endPos,
-            template: template,
-            args: args,
-            subst: subst
-        });
-    }
-
-    function subst(str, args) {
-        var res = "";
-        var start = 0;
-        for (;;) {
-            var i = str.indexOf('%', start);
-            if (i < 0) {
-                if (start === 0)
-                    return str;
-                res += str.slice(start);
-                break;
-            }
-            res += str.slice(start, i);
-            var ch = str.charAt(i + 1);
-            if (ch === "") {
-                res += "%";
-                break;
-            }
-            if (ch >= "1" && ch <= "9") {
-                var argIndex = ch.charCodeAt(0) - "0".charCodeAt(0) - 1;
-                if (argIndex < args.length) {
-                    res += args[argIndex];
-                }
-            }
-            else {
-                res += "%";
-                if (ch !== "%") {
-                    res += ch;
-                }
-            }
-            start = i + 2;
-        }
-        return res;
+        throw new MicroXML.ParseError(source, startPos, endPos, template, args);
     }
 
     function formatCodePoint(ch) {

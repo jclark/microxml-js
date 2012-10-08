@@ -13,7 +13,7 @@
             catch (exc) {
                 document.getElementById("json").textContent = "";
                 var message;
-                if (exc.origin === "MicroXML") {
+                if (exc instanceof MicroXML.ParseError) {
                     message = "Parse error: " + exc.message + ".";
                     textarea.setSelectionRange(exc.startPosition, exc.endPosition);
                     textarea.focus();
