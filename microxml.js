@@ -124,6 +124,8 @@ MicroXML.parse = function (source) {
         if (curChar < "\uD800" || curChar > "\uDB7F" || pos + 1 === source.length)
             return false;
         var code2 = source.charCodeAt(pos + 1);
+        if (code2 < 0xDC00 || code2 > 0xDFFF)
+            return false;
         if ((code2 & 0x3FE) === 0x3FE) {
             var code1 = curChar.charCodeAt(0);
             if ((code1 & 0x3F) === 0x3F)

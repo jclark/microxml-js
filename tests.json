@@ -349,5 +349,9 @@
 	"comment": "This is #x10FFFD, the maximum code point that is not a noncharacter",
 	"source": "<doc>\uDBFF\uDFFD</doc>",
 	"result": ["doc",{},["\uDBFF\uDFFD"]]
+    },
+    {
+	"id": "0079",
+	"source": "<\uD800X/>"
     }
  ]
