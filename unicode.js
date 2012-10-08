@@ -80,8 +80,7 @@ markRanges(nameStartRanges, 1);
 markRanges(nameRanges, 2);
 
 
-function charTests() {
-    var tests = [];
+function charTests(run) {
     var test = { };
     var i;
     var ch;
@@ -100,80 +99,57 @@ function charTests() {
     test.id = "good";
     test.source += "</c>";
     test.result = ["c", {}, [text]];
-    tests.push(test);
+    run(test);
     for (i = 0; i <= 0x10ffff; i++) {
 	if (!chars[i] && i !== "\r".charCodeAt(0)) {
 	    test = { };
 	    test.source = "<c>" + encodeUTF16(i) + "</c>";
 	    test.id = "bad-" + i.toString(16).toUpperCase();
-	    tests.push(test);
+	    run(test);
 	}
     }
-    return tests;
 }
 
-function charRefTests() {
-    var tests = [];
+function charRefTests(run) {
     var test = { };
     var i;
-    var text;
-    test.source = "<c>";
-    text = "";
     for (i = 0; i <= 0x10ffff; i++) {
+	test = { };
+	test.source = "<c>&#x" + i.toString(16) + ";</c>";
 	if (chars[i]) {
-	    test.source += "&#x" + i.toString(16) + ";";
-	    text += encodeUTF16(i);
+	    test.result = ["c", {}, [encodeUTF16(i)]];
+	    test.id = "good-";
 	}
-    }
-    test.id = "good";
-    test.source += "</c>";
-    test.result = ["c", {}, [text]];
-    tests.push(test);
-    for (i = 0; i <= 0x10ffff; i++) {
-	if (!chars[i]) {
-	    test = { };
-	    test.source = "<c>&#x" + i.toString(16) + ";</c>";
-	    test.id = "bad-" + i.toString(16).toUpperCase();
-	    tests.push(test);
+	else {
+	    test.id = "bad-";
 	}
+	test.id += i.toString(16).toUpperCase();	
+	run(test);
     }
-    return tests;
 }
 	
-function nameStartCharTests() {
-    var tests = [];
+function nameStartCharTests(run) {
     var test;
     var i;
     var ch;
-    var content = [];
-
-    test = {};
-    test.id = "good";
-    test.source = "<doc>";
-    for (i = 0; i <= 0x10ffff; ++i) {
-	if (chars[i] === 1) {
-	    ch = encodeUTF16(i);
-	    test.source += "<" + ch + "/>";
-	    content.push([ch,{},[]]);
-	}
-    }
-    test.result = ["doc",{},content];
-    test.source += "</doc>";
-    tests.push(test);
 
     for (i = 0; i <= 0x10ffff; ++i) {
-	if (chars[i] === true || chars[i] === 2) {
-	    test = {};
-	    test.source = "<" + encodeUTF16(i) + "/>";
-	    test.id = "bad-" + i.toString(16).toUpperCase();
-	    tests.push(test);
+	test = {};
+	ch = encodeUTF16(i);
+	test.source = "<" + ch + "X/>";
+	if (chars[i] === 1) { 
+	    test.result = [ch + "X",{},[]];
+	    test.id = "good-";
 	}
+	else {
+	    test.id = "bad-";
+	}
+	test.id += i.toString(16).toUpperCase();
+	run(test);
     }
-    return tests;
 }
 
-function nameCharTests() {
-    var tests = [];
+function nameCharTests(run) {
     var test;
     var i;
      var name = "";
@@ -188,17 +164,16 @@ function nameCharTests() {
     }
     test.source = "<" + name + "/>";
     test.result = [name,{},[]];
-    tests.push(test);
+    run(test);
 
     for (i = 0x21; i <= 0x10ffff; ++i) {
 	if (chars[i] !== 1 && chars[i] !== 2) {
 	    test = {};
 	    test.source = "<X" + encodeUTF16(i) + "/>";
 	    test.id = "bad-" + i.toString(16).toUpperCase();
-	    tests.push(test);
+	    run(test);
 	}
     }
-    return tests;
 }
 
 function encodeUTF16(codePoint) {
