@@ -1,9 +1,3 @@
-This project will contain a variety of MicroXML-related code. See http://www.w3.org/community/microxml/ for more
-about MicroXML.
+This is a MicroXML parser in JavaScript.
 
-The js/ directory contains a simple MicroXML parser in JavaScript.
-
-The java/directory contains the beginnings of a MicroXML parser in Java.
-
-James Clark
-jjc@jclark.com
+See http://www.w3.org/community/microxml/ for more about MicroXML.
