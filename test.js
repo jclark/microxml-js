@@ -1,20 +1,21 @@
 #!/usr/bin/env js -f
+// Run tests under the SpiderMonkey shell
 
 load("microxml.js");
 load("unicode.js");
 
-function runTestSuite(suiteName, print, map) {
+function runTestSuite(suiteName, map) {
     var nPassed = 0;
     var nFailed = 0;
-    map(function (t) {
-        var id = suiteName + ":" + t.id;
+    map(function (id, source, result) {
+        var r;
         try {
-            r = MicroXML.parse(t.source);
-            if (!t.result) {
+            r = MicroXML.parse(source);
+            if (!result) {
                 print("Test " + id + " was incorrectly reported as conforming");
                 ++nFailed;
             }
-            else if (deepEqual(r, t.result))
+            else if (deepEqual(r, result))
                 ++nPassed;
             else {
                 ++nFailed;
@@ -23,7 +24,7 @@ function runTestSuite(suiteName, print, map) {
         }
         catch (e) {
             if (e instanceof MicroXML.ParseError) {
-                if (t.result) {
+                if (result) {
                     print("Test " + id + " was incorrectly reporting as non-conforming (" + e.message + ")");
                     ++nFailed;
                 }
@@ -56,24 +57,19 @@ function deepEqual(v1, v2) {
     return v1 === v2;
 }
 
-function runJsonTests(filename, runner, print) {
-    var tests = JSON.parse(read(filename));
-    runner(filename, print, function (run) {
-	var i;
-	for (i = 0; i < tests.length; i++) {
-            run(tests[i]);
-	}
-	});
+function runJSONTests(filename) {
+    runTestSuite(filename,
+        function (run) {
+            var tests = JSON.parse(read(filename));
+            var i;
+            for (i = 0; i < tests.length; i++) {
+                var t = tests[i];
+                run(filename + t.id, t.source, t.result);
+            }
+        });
 }
 
-function runAllTests(runner, print) {
-    runJsonTests("tests.json", runner, print);
-    runner("nameStartCharTests", print, nameStartCharTests);
-    runner("charTests", print, charTests);
-    runner("charRefTests", print, charRefTests);
-    runner("nameCharTests", print, nameCharTests);
-}
-
-runAllTests(runTestSuite, print);
-
+runJSONTests("tests.json");
+print("Running exhaustive Unicode tests. This will take a few minutes...")
+runTestSuite("unicode", testUnicode);
 
