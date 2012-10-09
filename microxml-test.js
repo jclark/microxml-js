@@ -7,7 +7,7 @@ MicroXMLTest = TestCase("MicroXMLTest");
     function def(source, result) {
 	return function () {
 	    var actualResult = undefined;
-	    var expection = undefined;
+	    var exception = undefined;
 	    expectAsserts(1);
             try {
 		actualResult = MicroXML.parse(source);
@@ -16,10 +16,10 @@ MicroXMLTest = TestCase("MicroXMLTest");
 		exception = e;
             }
             if (result === undefined) {
-		assertInstanceOf(MicroXML.ParseError, exception);
+		assertInstanceOf("non-conformance not detected:", MicroXML.ParseError, exception);
             }
             else {
-		assertEquals(result, actualResult);
+		assertEquals("incorrect parse result:", result, actualResult);
             }
 	};
     }
