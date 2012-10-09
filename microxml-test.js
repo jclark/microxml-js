@@ -1,5 +1,4 @@
 // This runs the tests in tests.json using JsTestDriver
-// tests.json needs to be prefixed with "MicroXML.tests=" and loaded before this gets run.
 
 MicroXMLTest = TestCase("MicroXMLTest");
 
@@ -25,8 +24,13 @@ MicroXMLTest = TestCase("MicroXMLTest");
 	};
     }
     var i;
-    for (i = 0; i < MicroXML.tests.length; i++) {
-	var t = MicroXML.tests[i];
+    var tests;
+    var request = new XMLHttpRequest();
+    request.open("GET", "/test/tests.json", false);
+    request.send();
+    tests = JSON.parse(request.responseText);
+    for (i = 0; i < tests.length; i++) {
+	var t = tests[i];
 	MicroXMLTest.prototype["test " + t.id] = def(t.source, t.result);
     }
 })();
