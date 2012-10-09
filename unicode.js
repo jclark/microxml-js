@@ -6,7 +6,7 @@
  * undefined otherwise.
  * @param run {function(!string, !string, string=):undefined}
  */
-function testUnicode(run) {
+function runUnicodeTests(run) {
     "use strict";
     var forbiddenRanges = [
         [0x0, 0x1F],
@@ -159,7 +159,7 @@ function testUnicode(run) {
     var p;
     // If the declaration of testUnicode above didn't set a property on the global object,
     // and there is an in-scope exports variable, then add testUnicode exports.
-    if (this.testUnicode !== testUnicode && typeof(exports) !== "undefined") {
-        exports.testUnicode = testUnicode;
+    if (this.runUnicodeTests !== runUnicodeTests && typeof(exports) !== "undefined") {
+        exports.runUnicodeTests = runUnicodeTests;
     }
 })();

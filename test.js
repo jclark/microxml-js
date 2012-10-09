@@ -71,5 +71,5 @@ function runJSONTests(filename) {
 
 runJSONTests("tests.json");
 print("Running exhaustive Unicode tests. This will take a few minutes...")
-runTestSuite("unicode", testUnicode);
+runTestSuite("unicode", runUnicodeTests);
 
