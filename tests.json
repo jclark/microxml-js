@@ -351,7 +351,190 @@
 	"result": ["doc",{},["\uDBFF\uDFFD"]]
     },
     {
-	"id": "0079",
+	"id": "0078",
 	"source": "<\uD800X/>"
+    },
+    {
+	"id": "0079",
+	"source": "<doc></doc>junk"
+    },
+    {
+	"id": "0080",
+	"source": "<doc></doc><doc/>"
+    },
+    {
+	"id": "0081",
+	"source": "<doc></doc> \n\r\t",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0082",
+	"source": "<doc>x<br/>y</doc>",
+	"result": ["doc",{},["x", ["br",{},[]], "y"]]
+    },
+    {
+	"id": "0083",
+	"source": "<doc></doc>",
+	"result": ["doc",{},[]]
+    },
+    {
+	"id": "0084",
+	"source": "<doc>x<!-- a comment -->y</doc>",
+	"result": ["doc",{},["xy"]]
+    },
+    {
+	"id": "0085",
+	"source": "<doc> \t\n</doc>",
+	"result": ["doc",{},[" \t\n"]]
+    },
+    {
+	"id": "0086",
+	"source": "<doc>\b</doc>"
+    },
+    {
+	"id": "0087",
+	"source": "<doc>\f</doc>"
+    },
+    {
+	"id": "0088",
+	"source": "<doc>\uFFFF</doc>"
+    },
+    {
+	"id": "0089",
+	"source": "<doc>\u0000</doc>"
+    },
+    {
+	"id": "0090",
+	"source": "<doc>\u007F</doc>"
+    },
+    {
+	"id": "0091",
+	"source": "<doc>\u0080</doc>"
+    },
+    {
+	"id": "0092",
+	"source": "<doc att='val>Forgot the closing quote</doc>"
+    },
+    {
+	"id": "0093",
+	"source": "<doc att='val"
+    },
+    {
+	"id": "0094",
+	"source": "<doc att='\b'></doc>"
+    },
+    {
+	"id": "0095",
+	"source": "<doc att='<'></doc>"
+    },
+    {
+	"id": "0096",
+	"source": "<doc><!--\b--></doc>"
+    },
+    {
+	"id": "0097",
+	"source": "<doc>&#x3c;</doc>",
+	"result": ["doc",{},["<"]]
+    },
+    {
+	"id": "0098",
+	"source": "<doc>&#x3c;</doc>",
+	"result": ["doc",{},["<"]]
+    },
+    {
+	"id": "0099",
+	"source": "<doc>&#x26;</doc>",
+	"result": ["doc",{},["&"]]
+    },
+    {
+	"id": "0100",
+	"source": "<doc>&#x3E;</doc>",
+	"result": ["doc",{},[">"]]
+    },
+    {
+	"id": "0101",
+	"source": "<doc>&#xFFFD;</doc>",
+	"result": ["doc",{},["\uFFFD"]]
+    },
+    {
+	"id": "0102",
+	"source": "<doc>&#x10000;</doc>",
+	"result": ["doc",{},["\uD800\uDC00"]]
+    },
+    {
+	"id": "0103",
+	"source": "<doc>&#x9;&#xA;&#x20;</doc>",
+	"result": ["doc",{},["\t\n "]]
+    },
+    {
+	"id": "0104",
+	"source": "<doc att=\"&#x22;\"/>",
+	"result": ["doc",{"att": "\""},[]]
+    },
+    {
+	"id": "0105",
+	"source": "<doc>&#x110000;</doc>"
+    },
+    {
+	"id": "0106",
+	"source": "<doc>&#xD800;</doc>"
+    },
+    {
+	"id": "0107",
+	"source": "<doc>&#xDC00;</doc>"
+    },
+    {
+	"id": "0108",
+	"source": "<doc>&#xDFFF;</doc>"
+    },
+    {
+	"id": "0109",
+	"source": "<doc>&#xD;</doc>"
+    },
+    {
+	"id": "0110",
+	"source": "<doc>&#x0;</doc>"
+    },
+    {
+	"id": "0111",
+	"source": "<doc>&#x8;</doc>"
+    },
+    {
+	"id": "0112",
+	"source": "<doc>&#xFFFE;</doc>"
+    },
+    {
+	"id": "0113",
+	"source": "<doc>&#x10FFFF;</doc>"
+    },
+    {
+	"id": "0114",
+	"source": "<doc>&#x9f;</doc>"
+    },
+    {
+	"id": "0115",
+	"source": "<doc>\uDC00</doc>"
+    },
+    {
+	"id": "0116",
+	"source": "<doc>\uD800"
+    },
+    {
+	"id": "0117",
+	"source": "<doc>\uD800</doc>"
+    },
+    {
+	"id": "0118",
+	"source": "<\uD800\uDC00/>",
+	"result": ["\uD800\uDC00",{},[]]
+    },
+    {
+	"id": "0119",
+	"source": "<\uDB7F\uDFFF/>"
+    },
+    {
+	"id": "0120",
+	"source": "<\uDB7F\uDFFD/>",
+	"result": ["\uDB7F\uDFFD",{},[]]
     }
  ]
