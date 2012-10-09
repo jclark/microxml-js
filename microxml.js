@@ -48,6 +48,12 @@ MicroXML.ParseError.prototype.subst = function subst(str, args) {
     return res;
 };
 
+/**
+ *
+ * @param source {String}
+ * @return {Object}
+ * @throws {MicroXML.ParseError}
+ */
 MicroXML.parse = function (source) {
     "use strict";
     var pos = 0;
@@ -161,7 +167,6 @@ MicroXML.parse = function (source) {
             parseComment();
         }
         error("only comments and white space are allowed after the document element");
-        return result;
     }
 
     /* precondition: current char is after "!"
@@ -176,7 +181,6 @@ MicroXML.parse = function (source) {
             switch (curChar) {
                 case "":
                     error("missing comment close \"-->\"");
-                    break;
                 case "-":
                     advance();
                     if (tryChar("-")) {
@@ -230,7 +234,7 @@ MicroXML.parse = function (source) {
             else if (codePoint >= 0xD800) {
                 if (codePoint >= 0x10000) {
                     if (codePoint > 0x10FFFF)
-                        charRefError("character number #x%1 not allowed: greater than #x10FFF");
+                        charRefError("character number #x%1 not allowed: greater than #x10FFFF");
                     if ((codePoint & 0xFFFE) === 0xFFFE)
                         charRefError("reference to noncharacter code point #x%1 not allowed");
                     codePoint -= 0x10000;
@@ -324,13 +328,10 @@ MicroXML.parse = function (source) {
             switch (curChar) {
                 case "":
                     posError(quotePos, pos, "attribute value without closing quote");
-                    break;
                 case "<":
                     error("\"<\" in attribute value (missing closing quote?)");
-                    break;
                 case ">":
                     error("\">\" characters must always be escaped, including in attribute values");
-                    break;
                 case "&":
                     advance();
                     value += parseCharRef();
@@ -419,10 +420,8 @@ MicroXML.parse = function (source) {
                     break;
                 case ">":
                     error("\">\" characters must always be escaped");
-                    break;
                 case "":
                     error("missing end-tag \"%1\"", name);
-                    break;
                 case "\n":
                 case "\t":
                     text += curChar;
