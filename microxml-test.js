@@ -35,3 +35,13 @@ MicroXMLTest = TestCase("MicroXMLTest");
     }
 })();
 
+MicroXMLTest.prototype.testSubst = function () {
+    var subst = MicroXML.ParseError.prototype.subst;
+    assertEquals("%", subst("%%", []));
+    assertEquals("%a", subst("%a", []));
+    assertEquals("%0", subst("%0", ["arg"]));
+    assertEquals("xy", subst("x%1y", []));
+    assertEquals("'arg'", subst("'%1'", ["arg"]));
+    assertEquals("100%", subst("100%", ["arg"]));
+};
+
