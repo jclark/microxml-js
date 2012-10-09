@@ -4,6 +4,8 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Node.js v0.8.11 Core Library" level="application" />
+    <orderEntry type="library" name="JsTestDriver Assertion Framework" level="application" />
   </component>
 </module>
 
